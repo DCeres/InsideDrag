@@ -61,7 +61,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 
 	m_edit.Create(m_hzSplit.m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | /*WS_CLIPSIBLINGS | */WS_CLIPCHILDREN | WS_BORDER, 0);
-	m_edit.SetFilename(LR"(D:\Library\WTL\CPL.TXT)");
+	//m_edit.SetFilename(LR"(D:\Library\WTL\CPL.TXT)");
 
 	m_Split.SetSplitterPanes(m_list.m_hWnd, m_hzSplit.m_hWnd);
 	m_hzSplit.SetSplitterPanes(m_view->m_hWnd, m_edit.m_hWnd);

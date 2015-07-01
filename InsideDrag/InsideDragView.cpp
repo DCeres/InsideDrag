@@ -165,6 +165,32 @@ HRESULT STDMETHODCALLTYPE CInsideDragView::DragEnter(IDataObject __RPC_FAR *pDat
 	return CIDropTarget::DragEnter(pDataObj, grfKeyState, pt, pdwEffect);
 }
 
+/*
+HRESULT STDMETHODCALLTYPE CInsideDragView::Drop(IDataObject __RPC_FAR *pDataObj, DWORD grfKeyState, / * [in] * / POINTL pt, DWORD __RPC_FAR *pdwEffect)
+{
+	if (pDataObj == NULL)
+		return E_INVALIDARG;
+
+	if (QueryDrop(grfKeyState, pdwEffect))
+	{
+		IEnumFORMATETC* pEnum;
+		pDataObj->EnumFormatEtc(DATADIR_GET, &pEnum);
+		FORMATETC ftm;
+		while (pEnum->Next(1, &ftm, 0) == S_OK)
+		{
+			STGMEDIUM medium;
+			if (pDataObj->GetData(&ftm, &medium) == S_OK)
+			{
+				if (OnDrop(&ftm, medium, pdwEffect)) //does derive class wants us to free medium?
+					ReleaseStgMedium(&medium);
+			}
+		};
+		pEnum->Release();
+	}
+	*pdwEffect = DROPEFFECT_NONE;
+	return S_OK;
+}*/
+
 bool CInsideDragView::OnDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium, DWORD *pdwEffect)
 {
 	m_pDoc->AddDrop(pFmtEtc, medium);

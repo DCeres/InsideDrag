@@ -1,8 +1,8 @@
 
 #include "StdAfx.h"
 #include "resource.h"
-
 #include "HexEditor.h"
+#include "DataFile.h"
 
 #define ROUND(x) (x / m_iDataSize * m_iDataSize)
 
@@ -42,12 +42,10 @@ BOOL CHexEditorCtrl::PreTranslateMessage(MSG* /*pMsg*/)
 	return FALSE;
 }
 
-BOOL CHexEditorCtrl::SetFilename(LPCTSTR pstrFilename)
+BOOL CHexEditorCtrl::SetFile(CDataFileBase* pFile)
 {
 	ATLASSERT(::IsWindow(m_hWnd));
-	m_File.Close();
-	if (!m_File.Open(pstrFilename)) return FALSE;
-	m_sFilename = pstrFilename;
+	m_pFile = pFile;
 	m_aUndostack.RemoveAll();
 	m_dwPos = 0;
 	SetScrollPos(SB_VERT, 0);
@@ -73,7 +71,7 @@ BOOL CHexEditorCtrl::Undo()
 	{
 		UNDOENTRY entry = m_aUndostack[m_aUndostack.GetSize() - 1];
 		m_aUndostack.RemoveAt(m_aUndostack.GetSize() - 1);
-		LPBYTE pData = m_File.GetData();
+		LPBYTE pData = m_pFile->GetData();
 		*(pData + entry.dwPos) = entry.bValue;
 	}
 	SetSel(dwPos, dwPos);
@@ -161,11 +159,18 @@ void CHexEditorCtrl::SetDisplayOptions(BOOL bShowAddress, BOOL bShowData, BOOL b
 BOOL CHexEditorCtrl::SetSel(DWORD dwStart, DWORD dwEnd, BOOL bNoScroll /*= FALSE*/)
 {
 	ATLASSERT(::IsWindow(m_hWnd));
-	if (!m_File.IsOpen()) return FALSE;
-	if (dwEnd == (DWORD)-1) dwEnd = m_File.GetSize();
-	if (dwStart == dwEnd && dwEnd >= m_File.GetSize()) dwEnd = m_File.GetSize() - 1;
-	if (dwStart != dwEnd && dwEnd > m_File.GetSize()) dwEnd = m_File.GetSize();
-	if (dwStart >= m_File.GetSize()) dwStart = m_File.GetSize() - 1;
+	if (!m_pFile) 
+		return FALSE;
+
+	if (!m_pFile->IsOpen()) return FALSE;
+	if (dwEnd == (DWORD)-1) 
+		dwEnd = m_pFile->GetSize();
+	if (dwStart == dwEnd && dwEnd >= m_pFile->GetSize()) 
+		dwEnd = m_pFile->GetSize() - 1;
+	if (dwStart != dwEnd && dwEnd > m_pFile->GetSize()) 
+		dwEnd = m_pFile->GetSize();
+	if (dwStart >= m_pFile->GetSize()) 
+		dwStart = m_pFile->GetSize() - 1;
 	dwStart = ROUND(dwStart);
 	dwEnd = ROUND(dwEnd);
 	if (dwEnd == dwStart && m_dwSelStart != m_dwSelEnd) ShowCaret();
@@ -213,7 +218,7 @@ LRESULT CHexEditorCtrl::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 
 LRESULT CHexEditorCtrl::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	if (m_File.IsOpen()) {
+	if (m_pFile && m_pFile->IsOpen()) {
 		CreateSolidCaret(2, m_tmEditor.tmHeight - 2);
 		ShowCaret();
 	}
@@ -264,6 +269,8 @@ LRESULT CHexEditorCtrl::OnChar(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, 
 
 LRESULT CHexEditorCtrl::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
+	if (!m_pFile)
+		return 0;
 	if (GetCapture() == m_hWnd) {
 		ReleaseCapture();
 		return 0;
@@ -286,7 +293,7 @@ LRESULT CHexEditorCtrl::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*
 		SetSel(bShift ? m_dwSelStart : m_dwSelEnd - m_iDataSize, m_dwSelEnd - m_iDataSize);
 		return 0;
 	case VK_RIGHT:
-		if (m_dwSelStart + m_iDataSize > m_File.GetSize()) return 0;
+		if (m_dwSelStart + m_iDataSize > m_pFile->GetSize()) return 0;
 		SetSel(bShift ? m_dwSelStart : m_dwSelEnd + m_iDataSize, m_dwSelEnd + m_iDataSize);
 		return 0;
 	case VK_UP:
@@ -296,7 +303,7 @@ LRESULT CHexEditorCtrl::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*
 		return 0;
 	case VK_DOWN:
 		if (bCtrl) return SendMessage(WM_VSCROLL, SB_LINEDOWN);
-		if (m_dwSelStart + BYTES_PR_LINE > m_File.GetSize()) return 0;
+		if (m_dwSelStart + BYTES_PR_LINE > m_pFile->GetSize()) return 0;
 		SetSel(bShift ? m_dwSelStart : m_dwSelEnd + BYTES_PR_LINE, m_dwSelEnd + BYTES_PR_LINE);
 		return 0;
 	case VK_HOME:
@@ -304,7 +311,7 @@ LRESULT CHexEditorCtrl::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*
 		else SetSel(bShift ? m_dwSelStart : m_dwSelEnd - (m_dwSelEnd % BYTES_PR_LINE), m_dwSelEnd - (m_dwSelEnd % BYTES_PR_LINE));
 		return 0;
 	case VK_END:
-		if (bCtrl) SetSel(bShift ? m_dwSelStart : m_File.GetSize() - 1, m_File.GetSize() - (bShift ? 0 : 1));
+		if (bCtrl) SetSel(bShift ? m_dwSelStart : m_pFile->GetSize() - 1, m_pFile->GetSize() - (bShift ? 0 : 1));
 		else SetSel(bShift ? m_dwSelStart : (m_dwSelEnd | 0xF) + (bShift ? 1 : 0), (m_dwSelEnd | 0xF) + (bShift ? 1 : 0));
 		return 0;
 	case VK_PRIOR:
@@ -374,7 +381,8 @@ LRESULT CHexEditorCtrl::OnMouseMove(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lPa
 
 LRESULT CHexEditorCtrl::OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	SetScrollRange(SB_VERT, 0, (int)(m_File.GetSize() / BYTES_PR_LINE) - GetLinesPrPage() + 1, TRUE);
+	if (m_pFile)
+		SetScrollRange(SB_VERT, 0, (int)(m_pFile->GetSize() / BYTES_PR_LINE) - GetLinesPrPage() + 1, TRUE);
 	return 0;
 }
 
@@ -445,6 +453,8 @@ LRESULT CHexEditorCtrl::OnEditUndo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 
 LRESULT CHexEditorCtrl::OnEditCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	if (!m_pFile)
+		return 0;
 	DWORD dwStart = 0;
 	DWORD dwEnd = 0;
 	GetSel(dwStart, dwEnd);
@@ -460,7 +470,7 @@ LRESULT CHexEditorCtrl::OnEditCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 	sText.GetBuffer((dwEnd - dwStart) * 4);
 	sText.ReleaseBuffer(0);
 	// Generate text for clipboard
-	LPBYTE pData = m_File.GetData();
+	LPBYTE pData = m_pFile->GetData();
 	if (m_bInDataPane) {
 		TCHAR szBuffer[32];
 		DWORD nCount = 0;
@@ -484,9 +494,10 @@ LRESULT CHexEditorCtrl::OnEditCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 	LPCSTR p = sText;
 #endif
 	::EmptyClipboard();
-	HGLOBAL hglbCopy = GlobalAlloc(GMEM_MOVEABLE, strlen(p) + 1);
+	const SIZE_T nLen = strlen(p) + 1;
+	HGLOBAL hglbCopy = GlobalAlloc(GMEM_MOVEABLE, nLen);
 	LPSTR lptstrCopy = (LPSTR)GlobalLock(hglbCopy);
-	strcpy(lptstrCopy, p);
+	strcpy_s(lptstrCopy, nLen, p);
 	GlobalUnlock(hglbCopy);
 	::SetClipboardData(CF_TEXT, lptstrCopy);
 	::CloseClipboard();
@@ -576,11 +587,13 @@ void CHexEditorCtrl::RecalcPosition(DWORD dwPos)
 
 void CHexEditorCtrl::AssignDigitValue(DWORD& dwPos, DWORD& dwCursorPos, BYTE bValue)
 {
-	ATLASSERT(m_File.GetData() != NULL);
-	ATLASSERT(dwPos < m_File.GetSize());
+	if (!m_pFile)
+		return;
+	ATLASSERT(m_pFile->GetData() != NULL);
+	ATLASSERT(dwPos < m_pFile->GetSize());
 	ATLASSERT(bValue < 0x10);
 	// Calculate new data value (byte oriented)
-	LPBYTE pData = m_File.GetData();
+	LPBYTE pData = m_pFile->GetData();
 	DWORD dwOffset = dwPos + (m_iDataSize - 1 - (dwCursorPos / 2));
 	if ((dwCursorPos % 2) == 0) bValue = (BYTE)((*(pData + dwOffset) & 0x0F) | (bValue << 4));
 	else bValue = (BYTE)((*(pData + dwOffset) & 0xF0) | bValue);
@@ -598,10 +611,12 @@ void CHexEditorCtrl::AssignDigitValue(DWORD& dwPos, DWORD& dwCursorPos, BYTE bVa
 
 void CHexEditorCtrl::AssignCharValue(DWORD& dwPos, DWORD& dwCursorPos, BYTE bValue)
 {
-	ATLASSERT(m_File.GetData() != NULL);
-	ATLASSERT(dwPos < m_File.GetSize());
+	if (!m_pFile)
+		return;
+	ATLASSERT(m_pFile->GetData() != NULL);
+	ATLASSERT(dwPos < m_pFile->GetSize());
 	// Calculate new data value (cursor moves one digit; a byte i 2 digits)
-	LPBYTE pData = m_File.GetData();
+	LPBYTE pData = m_pFile->GetData();
 	DWORD dwOffset = dwPos + (dwCursorPos / 2);
 	// Create undo action
 	UNDOENTRY undo = { dwOffset, *(pData + dwOffset) };
@@ -630,8 +645,13 @@ void CHexEditorCtrl::DoPaint(CDCHandle dc)
 	int nLines = GetLinesPrPage() + 1;
 	int iHeight = GetLineHeight();
 
-	LPBYTE pData = m_File.GetData();
-	DWORD dwSize = m_File.GetSize();
+	LPBYTE pData = nullptr;
+	DWORD dwSize = 0;
+	if (m_pFile)
+	{
+		pData = m_pFile->GetData();
+		dwSize = m_pFile->GetSize();
+	}
 	DWORD dwPos = m_dwPos;
 
 	::ZeroMemory(&m_rcData, sizeof(m_rcData));

@@ -32,15 +32,15 @@ STDMETHODIMP CIDataObject::QueryInterface(/* [in] */ REFIID riid,
 {
 	*ppvObject = NULL;
 	if (IID_IUnknown==riid || IID_IDataObject==riid)
-             *ppvObject=this;
-   	/*if(riid == IID_IAsyncOperation)
+			 *ppvObject=this;
+	/*if(riid == IID_IAsyncOperation)
 		*ppvObject=(IAsyncOperation*)this;*/
-    if (NULL!=*ppvObject)
-    {
-        ((LPUNKNOWN)*ppvObject)->AddRef();
-        return S_OK;
-    }
-    return E_NOINTERFACE;
+	if (NULL!=*ppvObject)
+	{
+		((LPUNKNOWN)*ppvObject)->AddRef();
+		return S_OK;
+	}
+	return E_NOINTERFACE;
 }
 
 STDMETHODIMP_(ULONG) CIDataObject::AddRef( void)
@@ -55,13 +55,13 @@ STDMETHODIMP_(ULONG) CIDataObject::Release( void)
    long nTemp;
    nTemp = --m_cRefCount;
    if(nTemp==0)
-      delete this;
+	  delete this;
    return nTemp;
 }
 
 STDMETHODIMP CIDataObject::GetData( 
-    /* [unique][in] */ FORMATETC __RPC_FAR *pformatetcIn,
-    /* [out] */ STGMEDIUM __RPC_FAR *pmedium)
+	/* [unique][in] */ FORMATETC __RPC_FAR *pformatetcIn,
+	/* [out] */ STGMEDIUM __RPC_FAR *pmedium)
 { 
 	ATLTRACE("CIDataObject::GetData\n");
 	if(pformatetcIn == NULL || pmedium == NULL)
@@ -83,8 +83,8 @@ STDMETHODIMP CIDataObject::GetData(
 }
 
 STDMETHODIMP CIDataObject::GetDataHere( 
-    /* [unique][in] */ FORMATETC __RPC_FAR *pformatetc,
-    /* [out][in] */ STGMEDIUM __RPC_FAR *pmedium)
+	/* [unique][in] */ FORMATETC __RPC_FAR *pformatetc,
+	/* [out][in] */ STGMEDIUM __RPC_FAR *pmedium)
 { 
    ATLTRACE("CIDataObject::GetDataHere\n");
    
@@ -118,8 +118,8 @@ STDMETHODIMP CIDataObject::QueryGetData(
 }
 
 STDMETHODIMP CIDataObject::GetCanonicalFormatEtc( 
-    /* [unique][in] */ FORMATETC __RPC_FAR *pformatectIn,
-    /* [out] */ FORMATETC __RPC_FAR *pformatetcOut)
+	/* [unique][in] */ FORMATETC __RPC_FAR *pformatectIn,
+	/* [out] */ FORMATETC __RPC_FAR *pformatetcOut)
 { 
 	ATLTRACE("CIDataObject::GetCanonicalFormatEtc\n");
 	if (pformatetcOut == NULL)
@@ -128,13 +128,13 @@ STDMETHODIMP CIDataObject::GetCanonicalFormatEtc(
 }
 
 STDMETHODIMP CIDataObject::SetData( 
-    /* [unique][in] */ FORMATETC __RPC_FAR *pformatetc,
-    /* [unique][in] */ STGMEDIUM __RPC_FAR *pmedium,
-    /* [in] */ BOOL fRelease)
+	/* [unique][in] */ FORMATETC __RPC_FAR *pformatetc,
+	/* [unique][in] */ STGMEDIUM __RPC_FAR *pmedium,
+	/* [in] */ BOOL fRelease)
 { 
 	ATLTRACE("CIDataObject::SetData\n");
 	if(pformatetc == NULL || pmedium == NULL)
-      return E_INVALIDARG;
+	  return E_INVALIDARG;
 
 	ATLASSERT(pformatetc->tymed == pmedium->tymed);
 	FORMATETC* fetc=new FORMATETC;
@@ -149,15 +149,15 @@ STDMETHODIMP CIDataObject::SetData(
 	*fetc = *pformatetc;
 	m_ArrFormatEtc.Add(fetc);
 
-    if(fRelease)
-      *pStgMed = *pmedium;
-    else
-    {
+	if(fRelease)
+	  *pStgMed = *pmedium;
+	else
+	{
 		CopyMedium(pStgMed, pmedium, pformatetc);
 	}
 	m_StgMedium.Add(pStgMed);
 
-    return S_OK;
+	return S_OK;
 }
 void CIDataObject::CopyMedium(STGMEDIUM* pMedDest, STGMEDIUM* pMedSrc, FORMATETC* pFmtSrc)
 {
@@ -199,23 +199,23 @@ STDMETHODIMP CIDataObject::EnumFormatEtc(
 { 
 	ATLTRACE("CIDataObject::EnumFormatEtc\n");
 	if(ppenumFormatEtc == NULL)
-      return E_POINTER;
+	  return E_POINTER;
 
 	*ppenumFormatEtc=NULL;
 	switch (dwDirection)
-    {
-      case DATADIR_GET:
-         *ppenumFormatEtc= new CEnumFormatEtc(m_ArrFormatEtc);
+	{
+	  case DATADIR_GET:
+		 *ppenumFormatEtc= new CEnumFormatEtc(m_ArrFormatEtc);
 		 if(*ppenumFormatEtc == NULL)
 			 return E_OUTOFMEMORY;
-         (*ppenumFormatEtc)->AddRef(); 
-         break;
-      
+		 (*ppenumFormatEtc)->AddRef(); 
+		 break;
+	  
 	  case DATADIR_SET:
-      default:
+	  default:
 		 return E_NOTIMPL;
-         break;
-    }
+		 break;
+	}
 
    return S_OK;
 }
@@ -253,14 +253,14 @@ STDMETHODIMP CIDropSource::QueryInterface(/* [in] */ REFIID riid,
 {
    *ppvObject = NULL;
    if (IID_IUnknown==riid || IID_IDropSource==riid)
-       *ppvObject=this;
+	   *ppvObject=this;
 
-    if (*ppvObject != NULL)
-    {
-       ((LPUNKNOWN)*ppvObject)->AddRef();
-        return S_OK;
-    }
-    return E_NOINTERFACE;
+	if (*ppvObject != NULL)
+	{
+	   ((LPUNKNOWN)*ppvObject)->AddRef();
+		return S_OK;
+	}
+	return E_NOINTERFACE;
 }
 
 STDMETHODIMP_(ULONG) CIDropSource::AddRef( void)
@@ -276,21 +276,21 @@ STDMETHODIMP_(ULONG) CIDropSource::Release( void)
    nTemp = --m_cRefCount;
    ATLASSERT(nTemp >= 0);
    if(nTemp==0)
-      delete this;
+	  delete this;
    return nTemp;
 }
 
 STDMETHODIMP CIDropSource::QueryContinueDrag( 
-    /* [in] */ BOOL fEscapePressed,
-    /* [in] */ DWORD grfKeyState)
+	/* [in] */ BOOL fEscapePressed,
+	/* [in] */ DWORD grfKeyState)
 {
    //ATLTRACE("CIDropSource::QueryContinueDrag\n");
    if(fEscapePressed)
-      return DRAGDROP_S_CANCEL;
+	  return DRAGDROP_S_CANCEL;
    if(!(grfKeyState & (MK_LBUTTON|MK_RBUTTON)))
    {
 	  m_bDropped = true;
-      return DRAGDROP_S_DROP;
+	  return DRAGDROP_S_DROP;
    }
 
    return S_OK;
@@ -298,7 +298,7 @@ STDMETHODIMP CIDropSource::QueryContinueDrag(
 }
 
 STDMETHODIMP CIDropSource::GiveFeedback(
-    /* [in] */ DWORD dwEffect)
+	/* [in] */ DWORD dwEffect)
 {
 	//ATLTRACE("CIDropSource::GiveFeedback\n");
 	return DRAGDROP_S_USEDEFAULTCURSORS;
@@ -328,14 +328,14 @@ STDMETHODIMP  CEnumFormatEtc::QueryInterface(REFIID refiid, void FAR* FAR* ppv)
    ATLTRACE("CEnumFormatEtc::QueryInterface()\n");
    *ppv = NULL;
    if (IID_IUnknown==refiid || IID_IEnumFORMATETC==refiid)
-             *ppv=this;
+			 *ppv=this;
 
-    if (*ppv != NULL)
-    {
-        ((LPUNKNOWN)*ppv)->AddRef();
-        return S_OK;
-    }
-    return E_NOINTERFACE;
+	if (*ppv != NULL)
+	{
+		((LPUNKNOWN)*ppv)->AddRef();
+		return S_OK;
+	}
+	return E_NOINTERFACE;
 }
 
 STDMETHODIMP_(ULONG) CEnumFormatEtc::AddRef(void)
@@ -350,7 +350,7 @@ STDMETHODIMP_(ULONG) CEnumFormatEtc::Release(void)
    long nTemp = --m_cRefCount;
    ATLASSERT(nTemp >= 0);
    if(nTemp == 0)
-     delete this;
+	 delete this;
 
    return nTemp; 
 }
@@ -359,15 +359,15 @@ STDMETHODIMP CEnumFormatEtc::Next( ULONG celt,LPFORMATETC lpFormatEtc, ULONG FAR
 {
    ATLTRACE("CEnumFormatEtc::Next()\n");
    if(pceltFetched != NULL)
-   	   *pceltFetched=0;
+	   *pceltFetched=0;
 	
    ULONG cReturn = celt;
 
    if(celt <= 0 || lpFormatEtc == NULL || m_iCur >= m_pFmtEtc.GetSize())
-      return S_FALSE;
+	  return S_FALSE;
 
    if(pceltFetched == NULL && celt != 1) // pceltFetched can be NULL only for 1 item request
-      return S_FALSE;
+	  return S_FALSE;
 
 	while (m_iCur < m_pFmtEtc.GetSize() && cReturn > 0)
 	{
@@ -377,7 +377,7 @@ STDMETHODIMP CEnumFormatEtc::Next( ULONG celt,LPFORMATETC lpFormatEtc, ULONG FAR
 	if (pceltFetched != NULL)
 		*pceltFetched = celt - cReturn;
 
-    return (cReturn == 0) ? S_OK : S_FALSE;
+	return (cReturn == 0) ? S_OK : S_FALSE;
 }
    
 STDMETHODIMP CEnumFormatEtc::Skip(ULONG celt)
@@ -395,13 +395,13 @@ STDMETHODIMP CEnumFormatEtc::Reset(void)
    m_iCur = 0;
    return S_OK;
 }
-               
+			   
 STDMETHODIMP CEnumFormatEtc::Clone(IEnumFORMATETC FAR * FAR*ppCloneEnumFormatEtc)
 {
   ATLTRACE("CEnumFormatEtc::Clone()\n");
   if(ppCloneEnumFormatEtc == NULL)
-      return E_POINTER;
-      
+	  return E_POINTER;
+	  
   CEnumFormatEtc *newEnum = new CEnumFormatEtc(m_pFmtEtc);
   if(newEnum ==NULL)
 		return E_OUTOFMEMORY;  	
@@ -422,7 +422,7 @@ CIDropTarget::CIDropTarget(HWND hTargetWnd):
 	//ATLASSERT(m_hTargetWnd != NULL);
 
 	if(FAILED(CoCreateInstance(CLSID_DragDropHelper,NULL,CLSCTX_INPROC_SERVER,
-                     IID_IDropTargetHelper,(LPVOID*)&m_pDropTargetHelper)))
+					 IID_IDropTargetHelper,(LPVOID*)&m_pDropTargetHelper)))
 		m_pDropTargetHelper = NULL;
 }
 
@@ -475,7 +475,7 @@ bool CIDropTarget::QueryDrop(DWORD grfKeyState, LPDWORD pdwEffect)
 	//CTRL        -- DROPEFFECT_COPY
 	//SHIFT       -- DROPEFFECT_MOVE
 	//no modifier -- DROPEFFECT_MOVE or whatever is allowed by src
- 	*pdwEffect = (grfKeyState & MK_CONTROL) ?
+	*pdwEffect = (grfKeyState & MK_CONTROL) ?
 				 ( (grfKeyState & MK_SHIFT) ? DROPEFFECT_LINK : DROPEFFECT_COPY ):
 				 ( (grfKeyState & MK_SHIFT) ? DROPEFFECT_MOVE : 0 );
 	if(*pdwEffect == 0) 
@@ -504,10 +504,10 @@ bool CIDropTarget::QueryDrop(DWORD grfKeyState, LPDWORD pdwEffect)
 }   
 
 HRESULT STDMETHODCALLTYPE CIDropTarget::DragEnter(
-    /* [unique][in] */ IDataObject __RPC_FAR *pDataObj,
-    /* [in] */ DWORD grfKeyState,
-    /* [in] */ POINTL pt,
-    /* [out][in] */ DWORD __RPC_FAR *pdwEffect)
+	/* [unique][in] */ IDataObject __RPC_FAR *pDataObj,
+	/* [in] */ DWORD grfKeyState,
+	/* [in] */ POINTL pt,
+	/* [out][in] */ DWORD __RPC_FAR *pdwEffect)
 {
 	ATLTRACE("CIDropTarget::DragEnter\n");
 	if(pDataObj == NULL)
@@ -542,9 +542,9 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::DragEnter(
 }
 
 HRESULT STDMETHODCALLTYPE CIDropTarget::DragOver( 
-        /* [in] */ DWORD grfKeyState,
-        /* [in] */ POINTL pt,
-        /* [out][in] */ DWORD __RPC_FAR *pdwEffect)
+		/* [in] */ DWORD grfKeyState,
+		/* [in] */ POINTL pt,
+		/* [out][in] */ DWORD __RPC_FAR *pdwEffect)
 {
 	ATLTRACE("CIDropTarget::DragOver\n");
 	if(m_pDropTargetHelper)
@@ -567,7 +567,7 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::DragLeave( void)
 
 HRESULT STDMETHODCALLTYPE CIDropTarget::Drop(
 	/* [unique][in] */ IDataObject __RPC_FAR *pDataObj,
-    /* [in] */ DWORD grfKeyState, /* [in] */ POINTL pt, 
+	/* [in] */ DWORD grfKeyState, /* [in] */ POINTL pt, 
 	/* [out][in] */ DWORD __RPC_FAR *pdwEffect)
 {
 	ATLTRACE("CIDropTarget::Drop\n");
@@ -594,9 +594,6 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::Drop(
 		FORMATETC ftm;
 		while (pEnum->Next(1, &ftm, 0) == S_OK)
 		{
-// 			STGMEDIUM medium;
-// 			OnDrop(&ftm, medium, pdwEffect);
-
 			STGMEDIUM medium;
 			if (pDataObj->GetData(&ftm, &medium) == S_OK)
 			{
@@ -605,6 +602,7 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::Drop(
 			}
 		};
 		pEnum->Release();
+		//OleCreateStaticFromData(pDataObj, )
 	}
 	m_bAllowDrop=false;
 	*pdwEffect = DROPEFFECT_NONE;

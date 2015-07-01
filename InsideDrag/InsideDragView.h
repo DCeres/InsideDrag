@@ -21,6 +21,7 @@ public:
 	//CIDropTarget
 	virtual HRESULT STDMETHODCALLTYPE DragEnter(IDataObject __RPC_FAR *pDataObj, DWORD grfKeyState, POINTL pt, DWORD __RPC_FAR *pdwEffect) override;
 	virtual bool OnDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium, DWORD *pdwEffect) override;
+	//virtual HRESULT STDMETHODCALLTYPE Drop(IDataObject __RPC_FAR *pDataObj, DWORD grfKeyState, /* [in] */ POINTL pt, DWORD __RPC_FAR *pdwEffect) override;
 	virtual HRESULT STDMETHODCALLTYPE DragOver(DWORD grfKeyState, POINTL pt, DWORD __RPC_FAR *pdwEffect) override;
 	virtual HRESULT STDMETHODCALLTYPE DragLeave(void) override;
 

@@ -11,6 +11,13 @@
 #define _WIN32_IE	0x0700
 #define _RICHEDIT_VER	0x0500
 
+#define _SECURE_ATL 1
+#define _WTL_NO_CSTRING
+#define _WTL_NO_WTYPES
+
+#include <atlstr.h>
+#include <atltypes.h>
+
 #include <atlbase.h>
 #include <atlapp.h>
 
@@ -27,6 +34,8 @@ extern CAppModule _Module;
 #include <atlsplit.h>
 #include <atlfile.h>
 #include <atlctrlx.h>
+
+#include <msopc.h>
 
 #if defined _M_IX86
   #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
