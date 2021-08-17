@@ -159,17 +159,17 @@ void CHexEditorCtrl::SetDisplayOptions(BOOL bShowAddress, BOOL bShowData, BOOL b
 BOOL CHexEditorCtrl::SetSel(DWORD dwStart, DWORD dwEnd, BOOL bNoScroll /*= FALSE*/)
 {
 	ATLASSERT(::IsWindow(m_hWnd));
-	if (!m_pFile) 
+	if (!m_pFile)
 		return FALSE;
 
 	if (!m_pFile->IsOpen()) return FALSE;
-	if (dwEnd == (DWORD)-1) 
+	if (dwEnd == (DWORD)-1)
 		dwEnd = m_pFile->GetSize();
-	if (dwStart == dwEnd && dwEnd >= m_pFile->GetSize()) 
+	if (dwStart == dwEnd && dwEnd >= m_pFile->GetSize())
 		dwEnd = m_pFile->GetSize() - 1;
-	if (dwStart != dwEnd && dwEnd > m_pFile->GetSize()) 
+	if (dwStart != dwEnd && dwEnd > m_pFile->GetSize())
 		dwEnd = m_pFile->GetSize();
-	if (dwStart >= m_pFile->GetSize()) 
+	if (dwStart >= m_pFile->GetSize())
 		dwStart = m_pFile->GetSize() - 1;
 	dwStart = ROUND(dwStart);
 	dwEnd = ROUND(dwEnd);
@@ -201,7 +201,7 @@ void CHexEditorCtrl::GetSel(DWORD& dwStart, DWORD& dwEnd) const
 LRESULT CHexEditorCtrl::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	CLogFont lf = AtlGetStockFont(OEM_FIXED_FONT);
-	_tcscpy(lf.lfFaceName, _T("Lucida Console"));     // This is the font we prefer
+	_tcscpy_s(lf.lfFaceName, _T("Lucida Console"));     // This is the font we prefer
 	lf.lfPitchAndFamily = FIXED_PITCH;                // Make sure Windows finds a fixed-width font
 	m_fontEditor.CreateFontIndirect(&lf);
 
@@ -242,7 +242,7 @@ LRESULT CHexEditorCtrl::OnSetCursor(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*l
 	ScreenToClient(&pt);
 	DWORD dwDummy = 0;
 	bool bDummy = false;
-	::SetCursor(::LoadCursor(NULL, MAKEINTRESOURCE(GetPosFromPoint(pt, dwDummy, bDummy) ? IDC_IBEAM : IDC_ARROW)));
+	::SetCursor(::LoadCursor(nullptr, GetPosFromPoint(pt, dwDummy, bDummy) ? IDC_IBEAM : IDC_ARROW));
 	return TRUE;
 }
 
@@ -671,7 +671,7 @@ void CHexEditorCtrl::DoPaint(CDCHandle dc)
 
 	int ypos = rcClient.top;
 	TCHAR szBuffer[64] = { 0 };
-	for (int i = 0; i < nLines; i++) 
+	for (int i = 0; i < nLines; i++)
 	{
 		int xpos = rcClient.left;
 		// Draw address text
