@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 class CDataFileBase
 {
 public:
@@ -22,11 +23,27 @@ public:
 	CMapFile();
 	~CMapFile();
 public:
-	virtual  BOOL IsOpen() const override;
-	virtual  LPBYTE GetData() const override;
-	virtual  DWORD GetSize() const override;
+	BOOL IsOpen() const override;
+	LPBYTE GetData() const override;
+	DWORD GetSize() const override;
 
 public:
 	bool Open(LPCTSTR pstrFilename);
 	void Close();
+};
+
+class CMemoryFile : public CDataFileBase
+{
+public:
+	CMemoryFile(LPBYTE pBuf, DWORD dwSize): m_p(pBuf), m_dwSize(dwSize){};
+	CMemoryFile(HGLOBAL hGlobal);
+	~CMemoryFile() = default;
+
+	BOOL IsOpen() const override;
+	LPBYTE GetData() const override;
+	DWORD GetSize() const override;
+private:
+	std::vector<char> bufMemo;
+	DWORD m_dwSize = 0;
+	LPBYTE m_p = nullptr;
 };

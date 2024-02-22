@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "DragDoc.h"
 #include <atltime.h>
+#include "DataFile.h"
 
 
-CDragDoc::CDragDoc()
+CDragDoc::CDragDoc(CWindow& pMain): m_pMain(pMain)
 {
 
 	HRESULT hr = S_OK;
@@ -28,7 +29,7 @@ void CDragDoc::NewItem()
 	data.Name.Format(L"Drop_%d", m_Data.size() + 1);
 	_time64(&data.time);
 	m_Data.push_back(data);
-
+	m_nCurentIndex = m_Data.size() - 1;
 }
 
 bool CDragDoc::AddDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium)
@@ -59,7 +60,9 @@ bool CDragDoc::AddDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium)
 
 void CDragDoc::ClearView()
 {
-
+	std::unique_ptr<CDataFileBase> pFile = std::make_unique<CMemoryFile>(nullptr, 0);
+	m_pMain.SendMessageW(WM_VIEWHEX, 0, (LPARAM)pFile.get());
+	m_pFile.swap(pFile);
 }
 
 void CDragDoc::SetView(long nIndex)
@@ -71,7 +74,13 @@ void CDragDoc::SetView(long nIndex)
 	auto format = date.vecFormat.at(nIndex);
 	switch (format.medium.tymed)
 	{
-
+	case TYMED_HGLOBAL:
+		{
+			std::unique_ptr<CDataFileBase> pFile = std::make_unique<CMemoryFile>(format.medium.hGlobal);
+			m_pMain.SendMessageW(WM_VIEWHEX, 0, (LPARAM)pFile.get());
+			m_pFile.swap(pFile);
+		}
+		break;
 	default:
 		break;
 	}

@@ -108,6 +108,13 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 	return 1;
 }
 
+LRESULT CMainFrame::OnViewHex(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+	CDataFileBase* pFile = (CDataFileBase*) lParam;
+	m_edit.SetFile(pFile);
+	return 0;
+}
+
 LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	PostMessage(WM_CLOSE);

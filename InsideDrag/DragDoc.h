@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 
 struct FormatInfo
 {
@@ -17,7 +18,7 @@ struct DataInfo
 };
 
 typedef std::vector<DataInfo> vecData;
-
+class CDataFileBase;
 class CDragDoc
 {
 private:
@@ -26,10 +27,12 @@ private:
 	CComPtr<IOpcPartSet> m_opcPartSet;
 	CComPtr<IOpcPart> m_opcPart;
 
+	std::unique_ptr<CDataFileBase> m_pFile;
 	vecData m_Data;
 	long m_nCurentIndex = 0;
+	CWindow& m_pMain;
 public:
-	CDragDoc();
+	CDragDoc(CWindow& pMain);
 	~CDragDoc();
 	void New();
 	void NewItem();

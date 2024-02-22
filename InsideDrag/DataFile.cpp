@@ -74,3 +74,31 @@ DWORD CMapFile::GetSize() const
 {
 	return (DWORD)m_dwSize;
 }
+
+
+CMemoryFile::CMemoryFile(HGLOBAL hGlobal)
+{
+	SIZE_T size = GlobalSize(hGlobal);
+	const void* src = GlobalLock(hGlobal);
+	bufMemo.resize(size);
+	std::copy_n((char*)src, size, bufMemo.begin());
+	m_p = (LPBYTE) &bufMemo[0];
+	m_dwSize = size;
+	GlobalUnlock(hGlobal);
+	
+}
+
+BOOL CMemoryFile::IsOpen() const
+{
+	return TRUE;
+}
+
+LPBYTE CMemoryFile::GetData() const
+{
+	return m_p;
+}
+
+DWORD CMemoryFile::GetSize() const
+{
+	return m_dwSize;
+}
