@@ -90,6 +90,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	pLoop->AddMessageFilter(this);
 	pLoop->AddIdleHandler(this);
 
+	bRibbonUI = false;
 	ShowRibbonUI(bRibbonUI);
 	UISetCheck(ID_VIEW_RIBBON, bRibbonUI);
 	return 0;

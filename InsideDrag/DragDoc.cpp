@@ -33,11 +33,11 @@ void CDragDoc::NewItem()
 
 bool CDragDoc::AddDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium)
 {
-	FormatInfo info;
+	FormatInfo info = {0};
 	info.fmtEtc = *pFmtEtc;
 	::CopyStgMedium(&medium, &info.medium);
 
-	auto date = m_Data.back();
+	auto& date = m_Data.back();
 	date.vecFormat.push_back(info);
 
 
@@ -64,9 +64,11 @@ void CDragDoc::ClearView()
 
 void CDragDoc::SetView(long nIndex)
 {
-	auto date = m_Data.at(m_nCurentIndex);
-	auto format = date.vecFormat.at(nIndex);
+	auto& date = m_Data.at(m_nCurentIndex);
+	if (date.vecFormat.empty())
+		return;
 
+	auto format = date.vecFormat.at(nIndex);
 	switch (format.medium.tymed)
 	{
 

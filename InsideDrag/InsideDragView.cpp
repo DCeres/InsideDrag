@@ -8,23 +8,21 @@
 
 #include "InsideDragView.h"
 #include "DragDoc.h"
-//#include <..\..\..\..\..\..\..\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winuser.h>
 
-
-static LPCWSTR predefined_name(int n)
+static CString predefined_name(int cfFormat)
 {
-	static WCHAR buff[256];
-	if (n >= CF_GDIOBJFIRST && n <= CF_GDIOBJLAST) 
+	CString buff;
+	if (cfFormat >= CF_GDIOBJFIRST && cfFormat <= CF_GDIOBJLAST) 
 	{
-		wprintf(buff, L"CF_GDIOBJ%d", n);
+		buff.Format(L"CF_GDIOBJ%d", cfFormat);
 		return buff;
 	}
-	else if (n >= CF_PRIVATEFIRST && n <= CF_PRIVATELAST) 
+	else if (cfFormat >= CF_PRIVATEFIRST && cfFormat <= CF_PRIVATELAST) 
 	{
-		wprintf(buff, L"CF_PRIVATE%d", n);
+		buff.Format(L"CF_PRIVATE%d", cfFormat);
 		return buff;
 	}
-	switch (n) 
+	switch (cfFormat) 
 	{
 	case CF_BITMAP:			 return L"CF_BITMAP";
 	case CF_DIB:			 return L"CF_DIB";
@@ -49,10 +47,18 @@ static LPCWSTR predefined_name(int n)
 	case CF_TIFF:			 return L"CF_TIFF";
 	case CF_UNICODETEXT:	 return L"CF_UNICODETEXT";
 	}
-	return NULL;
+
+	const int nMaxCount = 250 * 4;
+	const int nLen = GetClipboardFormatName(cfFormat, buff.GetBuffer(nMaxCount), nMaxCount);
+	buff.ReleaseBuffer();
+	if (nLen <= 0)
+	{
+		buff.Format(L"(unknown %d)", cfFormat);
+	}
+	return buff;
 }
 
-static LPCWSTR GetTYMED_Name(TYMED nID)
+static CString GetTYMED_Name(TYMED nID)
 {
 	switch (nID)
 	{
@@ -67,11 +73,13 @@ static LPCWSTR GetTYMED_Name(TYMED nID)
 	default:
 		break;
 	}
-	return L"(unknown)";
+	CString buff;
+	buff.Format(L"(unknown %d)", nID);
+	return buff;
 }
 
 
-static LPCWSTR GetDVASPECT_Name(DWORD nID)
+static CString GetDVASPECT_Name(DWORD nID)
 {
 	switch (nID)
 	{
@@ -85,7 +93,9 @@ static LPCWSTR GetDVASPECT_Name(DWORD nID)
 	default:
 		break;
 	}
-	return L"(unknown)";
+	CString buff;
+	buff.Format(L"(unknown %d)", nID);
+	return buff;
 }
 
 
@@ -148,7 +158,7 @@ LRESULT CInsideDragView::OnSelChanged(int idCtrl, LPNMHDR pnmh, BOOL& bHandled)
 		if (pnmv->uNewState & LVIS_SELECTED)
 		{
 			CWaitCursor wait(true);
-			m_pDoc->SetView(pnmv->lParam);
+			m_pDoc->SetView(pnmv->iItem);
 		}
 		else
 		{
@@ -198,20 +208,9 @@ bool CInsideDragView::OnDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium, DWORD *pdwEf
 	int nCount = GetItemCount();
 	CString str;
 	str.Format(L"%d", pFmtEtc->cfFormat);
-	int nIndex = InsertItem(nCount, str);
 
-	str = predefined_name(pFmtEtc->cfFormat);
-	if (str.IsEmpty())
-	{
-		int nMaxCount = 250 * 4;
-		int nLen = GetClipboardFormatName(pFmtEtc->cfFormat, str.GetBuffer(nMaxCount), nMaxCount);
-		str.ReleaseBuffer();
-		if (nLen <= 0)
-		{
-			str = L"(unknown)";
-		}
-	}
-	SetItemText(nIndex, 1, str);
+	int nIndex = InsertItem(nCount, str);
+	SetItemText(nIndex, 1, predefined_name(pFmtEtc->cfFormat));
 	SetItemText(nIndex, 2, GetTYMED_Name((TYMED)pFmtEtc->tymed));
 
 	SIZE_T nSize = 0;
@@ -225,11 +224,9 @@ bool CInsideDragView::OnDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium, DWORD *pdwEf
 	}
 	str.Format(L"%d", nSize);
 	SetItemText(nIndex, 3, str);
-
-	str.Format(L"%d", nCount + 1);
+	str.Format(L"%d", pFmtEtc->lindex);
 	SetItemText(nIndex, 4, str);
 	SetItemText(nIndex, 5, GetDVASPECT_Name(pFmtEtc->dwAspect));
-
 	//SortItems();
 	return true;
 }
