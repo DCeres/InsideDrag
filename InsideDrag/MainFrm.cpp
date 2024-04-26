@@ -69,6 +69,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	m_list.Init(&m_doc);
 	m_view->InitDragDrop(&m_doc);
+	m_doc.New();
 
 	m_hzSplit.GetSystemSettings(true);
 	m_hzSplit.m_cxyMin = 0;

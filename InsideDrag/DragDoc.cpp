@@ -50,6 +50,8 @@ bool CDragDoc::AddDrop(FORMATETC* pFmtEtc, STGMEDIUM& medium)
 		return false;
 
 	hr = m_opcPartSet->CreatePart(pPartUri, L"", OPC_COMPRESSION_NORMAL, &m_opcPart);
+	if (!m_opcPart)
+		return false;
 
 	CComPtr<IStream> pFile;
 	hr = m_opcPart->GetContentStream(&pFile);
